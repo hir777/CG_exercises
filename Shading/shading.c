@@ -119,7 +119,7 @@ static void PhongModel(GLfloat* pe, GLfloat* ne, GLfloat* out_color) {
 
     // Get the vector v
     for( j = 0; j < 4; j++ )
-      v[j] = 0.0 - pe[j];
+      v[j] = 1.0 - pe[j];
     for( j = 0; j < 4; j++ )
       v[j] /= sqrt( innerProduct(v, v, 4) );
 
