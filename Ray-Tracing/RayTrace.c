@@ -202,11 +202,11 @@ static void shade(Vector3 hit_pos, Vector3 hit_normal,
     // direct illumination from the light source
 
     int i, hasObstacle = 0;
-    sub(scene._lights[l]._light_pos, hit_pos, &toLight);
-    normalize(toLight, &toLight);
-    for (i = 0; i < scene._number_spheres; ++i) {
-      hasObstacle += hitSphere(hit_pos, toLight, scene._spheres[i], &t);
-    }
+    //sub(scene._lights[l]._light_pos, hit_pos, &toLight);
+    //normalize(toLight, &toLight);
+    //for (i = 0; i < scene._number_spheres; ++i) {
+    //  hasObstacle += hitSphere(hit_pos, toLight, scene._spheres[i], &t);
+    //}
 
     // Check if there is an obstacle in the direction from hit position to the light source
     if( hasObstacle == 0 ) {
@@ -246,13 +246,9 @@ static void shade(Vector3 hit_pos, Vector3 hit_normal,
         computeDotProduct(V, R, &t);
         t = pow( fmaxf(t, 0.0), 1000);         // You have to fine-tune the shininess value
 
-        //color->_red   += hit_spec._red * scene._lights[l]._light_color._red * t;
-        //color->_green += hit_spec._green * scene._lights[l]._light_color._green * t;
-        //color->_blue  += hit_spec._blue * scene._lights[l]._light_color._blue * t;
-
-        color->_red   += hit_spec._red * hit_color._red * t;
-        color->_green += hit_spec._green * hit_color._green* t;
-        color->_blue  += hit_spec._blue * hit_color._blue * t;
+        color->_red   += hit_spec._red * scene._lights[l]._light_color._red * t;
+        color->_green += hit_spec._green * scene._lights[l]._light_color._green * t;
+        color->_blue  += hit_spec._blue * scene._lights[l]._light_color._blue * t;
 
     }
 
