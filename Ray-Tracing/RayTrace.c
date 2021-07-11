@@ -52,43 +52,36 @@ static void clamp(Color* c, float m, float M) {
 // Return 1 if there is an intersection, 0 otherwise.
 // *t contains the distance to the closest intersection point, if any.
 static int hitSphere(Vector3 origin, Vector3 direction, Sphere sphere, float* t) {
-  float a, c, b_square, d;
-  float dPlus, dMinus, dist;
-  Vector3 tmp;
+  float a, b, c, discriminant;
+  Vector3 direction_normalized, tmp;
 
-  normalize(direction, &direction);
+  normalize(direction, &direction_normalized);
 
-  // a 
-  sub(sphere._center, origin, &tmp);
-  computeDotProduct(direction, tmp, &a);
+  // at^2 + bt + c = 0
 
-  // c
+  // Get a
+  computeDotProduct(direction_normalized, direction_normalized, &a);
+
+  // Get b
   sub(origin, sphere._center, &tmp);
-  computeNorm(tmp, &c);
+  computeDotProduct(direction_normalized, tmp, &b);
+  b *= 2.0;
 
-  // b ^ 2
-  b_square = powf(c, 2.0) - powf(a, 2.0);
+  // Get c
+  computeDotProduct(tmp, tmp, &c);
+  c -= powf(sphere._radius, 2.0);
 
-  // Check if there is an intersection.
-  if( powf(sphere._radius, 2.0) - b_square < 0.0 )
-    return 0;                                     // Return 0 only when there is no intersection.
+  discriminant =  b * b - 4.0 * a * c;
 
-  
-  dPlus = sqrtf( powf(sphere._radius, 2.0) - b_square );
-  dMinus = -1.0 * dPlus;
+  if( discriminant < 0.0 ) {
+    return 0.0;
+  }
 
-  if( a - dPlus > 0 )
-    dist = MIN( a - dPlus, a - dMinus);
-  else
-    dist = a - dMinus;
-
-  mulAV(dist, direction, &tmp);
-
-  add(origin, tmp, &tmp);
-
-  computeNorm(tmp, t);
-
-  return 1;
+  if( ( *t = ( -b - sqrtf(discriminant) ) / ( 2.0 * a) ) < 0.0 )
+    return 0.0;
+  else {
+    return 1.0;
+  }
 }
 
 
@@ -203,10 +196,14 @@ static void shade(Vector3 hit_pos, Vector3 hit_normal,
     // Form a shadow ray and check if the hit point is under
     // direct illumination from the light source
 
-    int i, hasObstacle = 0;
+    Vector3 origin;
+    origin._x = hit_pos._x + powf(10.f,-5.0f)*hit_normal._x;
+    origin._y = hit_pos._y + powf(10.f,-5.0f)*hit_normal._y;
+    origin._z = hit_pos._z + powf(10.f,-5.0f)*hit_normal._z;
+    int hasObstacle = 0;
     sub(scene._lights[l]._light_pos, hit_pos, &toLight);
     normalize(toLight, &toLight);
-    hasObstacle = hitScene(hit_pos, toLight, scene, &pos, &normal, &cl, &spec);
+    hasObstacle = hitScene(origin, toLight, scene, &pos, &normal, &cl, &spec);
 
     // Check if there is an obstacle in the direction from hit position to the light source
     if( hasObstacle == 0 ) {
