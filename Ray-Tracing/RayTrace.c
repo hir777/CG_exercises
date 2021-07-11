@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #endif
 
+#include <stdio.h>
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
@@ -50,8 +51,7 @@ static void clamp(Color* c, float m, float M) {
 // sphere.
 // Return 1 if there is an intersection, 0 otherwise.
 // *t contains the distance to the closest intersection point, if any.
-static int hitSphere(Vector3 origin, Vector3 direction, Sphere sphere, float* t)
-{
+static int hitSphere(Vector3 origin, Vector3 direction, Sphere sphere, float* t) {
   float a, c, b_square, d;
   float dPlus, dMinus, dist;
   Vector3 tmp;
@@ -185,14 +185,16 @@ static void shade(Vector3 hit_pos, Vector3 hit_normal,
       Color hit_color, Color hit_spec, Scene scene, Color* color)
 {
   Vector3 L, V, R, I, toLight;
+  Vector3 pos, normal;
+  Color cl, spec;
   float t;
 
   // Complete
   // ambient component
 
-  color->_red   += scene._ambient._red * hit_color._red;
-  color->_green += scene._ambient._green * hit_color._green;
-  color->_blue  += scene._ambient._blue * hit_color._blue;
+  color->_red   += hit_color._red * scene._ambient._red;
+  color->_green += hit_color._green * scene._ambient._green;
+  color->_blue  += hit_color._blue * scene._ambient._blue; 
 
    // for each light in the scene
   int l;
@@ -202,11 +204,9 @@ static void shade(Vector3 hit_pos, Vector3 hit_normal,
     // direct illumination from the light source
 
     int i, hasObstacle = 0;
-    //sub(scene._lights[l]._light_pos, hit_pos, &toLight);
-    //normalize(toLight, &toLight);
-    //for (i = 0; i < scene._number_spheres; ++i) {
-    //  hasObstacle += hitSphere(hit_pos, toLight, scene._spheres[i], &t);
-    //}
+    sub(scene._lights[l]._light_pos, hit_pos, &toLight);
+    normalize(toLight, &toLight);
+    hasObstacle = hitScene(hit_pos, toLight, scene, &pos, &normal, &cl, &spec);
 
     // Check if there is an obstacle in the direction from hit position to the light source
     if( hasObstacle == 0 ) {
@@ -244,7 +244,7 @@ static void shade(Vector3 hit_pos, Vector3 hit_normal,
         add(I, R, &R);
 
         computeDotProduct(V, R, &t);
-        t = pow( fmaxf(t, 0.0), 1000);         // You have to fine-tune the shininess value
+        t = pow( fmaxf(t, 0.0), 10);         // You have to fine-tune the shininess value
 
         color->_red   += hit_spec._red * scene._lights[l]._light_color._red * t;
         color->_green += hit_spec._green * scene._lights[l]._light_color._green * t;
@@ -272,8 +272,8 @@ static int rayTrace(Vector3 origin, Vector3 direction_normalized,
 	     &hit_spec);
   
   // no hit
-  if (!hit) return 0; 
-
+  if (!hit)
+    return 0;
   color->_red = 0;
   color->_green = 0;
   color->_blue = 0;
@@ -332,12 +332,14 @@ void rayTraceScene(Scene scene, int width, int height, GLubyte** texture) {
       Color color;
       int hit = rayTrace(origin, direction_normalized, scene, &color);
       if (hit) {
-	clamp(&color, 0.f, 1.f);
-	image[i][j] = color;
+	      clamp(&color, 0.f, 1.f);
+	      image[i][j] = color;
       }
+
     }
+
   }
-	
+
   // save image to texture buffer
   saveRaw(image, width, height, texture);
 
