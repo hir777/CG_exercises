@@ -424,4 +424,34 @@ void heatStep(TriangleMesh* tri_mesh) {
   // Complete
   // Try to implement the mesh smoothing method described on p. 40-43 of the slides. 
   // The umbrella operator (p. 42) is sufficient here.
+  int i, j;
+  float lamda = 0.5;     // 0 < lamda < 1
+  
+  int num_verts = tri_mesh->_number_vertices;
+  for( i = 0; i < num_verts; i++ ) {
+    int num_neighbors = getNumberAdjacentVertices(tri_mesh, i);
+    
+    Vector3 L = {0.0, 0.0, 0.0};
+    // Loop through each neighbor
+    for( j = 0; j < num_neighbors; j++ ) {
+      
+      // Index in the vertex list of the j-th neighbor to the vertex i
+      int vj = getAdjacentVertex(tri_mesh, i, j);
+
+      // Get the coordinates of this vertex
+      Vector3 pj = tri_mesh->_vertices[vj];
+
+      add(pj, L, &L);
+    }
+    
+    mulAV(1.0 / num_neighbors, L, &L);
+    sub(L, tri_mesh->_vertices[i], &L);
+    
+    // Update
+    mulAV(lamda, L, &L);
+    add(tri_mesh->_vertices[i], L, &(tri_mesh->_vertices[i]));
+  }
+
+  computeTriangleNormals(tri_mesh);
+  computeVertexNormals(tri_mesh);
 }
