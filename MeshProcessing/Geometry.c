@@ -2,17 +2,6 @@
 
 #include "Geometry.h"
 
-// The function compares the two given vector.
-// Return value:
-// 1 equal
-// 0 not-equal
-int compare(Vector3 v1, Vector3 v2) {
-  if( v1._x == v2._x && v1._y == v2._y && v1._z == v2._z )
-    return 1;
-  else
-    return 0;
-}
-
 void add(Vector3 v1, Vector3 v2, Vector3* result) {
   result->_x = v1._x + v2._x;
   result->_y = v1._y + v2._y;
