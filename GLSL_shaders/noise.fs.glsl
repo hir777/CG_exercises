@@ -11,65 +11,6 @@ float hash(vec3 p)
   return fract(p.x*p.y*p.z*(p.x+p.y+p.z));
 }
 
-float max(float a, float b) {
-  return a >= b ? a : b;
-}
-
-float dot(vec4 a, vec4 b) {
-  float d = 0.0;
-  int i;
-
-  for( i = 0; i < 4; i++ )
-    d += a[i] * b[i];
-  return d;
-}
-
-vec4 sub(vec4 a, vec4 b) {
-  int i;
-  vec4 c;
-
-  for( i = 0; i < 4; i++ )
-    c[i] = a[i] - b[i];
-  return c;
-}
-
-vec4 add(vec4 a, vec4 b) {
-  int i;
-  vec4 c;
-
-  for( i = 0; i < 4; i++ )
-    c[i] = a[i] + b[i];
-  return c;
-}
-
-vec4 normalize(vec4 a) {
-  int i;
-  float d;
-  vec4 res;
-
-  d = sqrt( dot(a, a) );
-  
-  for( i = 0; i < 4; i++ ) ;
-    res[i] = a[i] / d;
-  return res;
-}
-
-vec4 multComponentWise(vec4 a, vec4 b, float val) {
-  int i;
-  vec4 res;
-  for( i = 0; i < 4; i++ )
-    res[i] = a[i] * b[i] * val;
-  return res;
-}
-
-vec4 mulAV(float a, vec4 v) {
-  int i;
-  vec4 res;
-
-  for( i = 0; i < 4; i++ )
-    res[i] = a * v[i];
-  return res;
-}
 
 float noise(in vec3 x)
 {
@@ -122,48 +63,38 @@ void main(){
   float shiny = 16.0;
   
   // light color
-  //vec4 lcol = vec4(1.0, 1.0, 1.0, 1.0);
-  vec4 lcol = vec4(1.0, 0.0, 0.0, 1.0);
+  vec4 lcol = vec4(1.0, 1.0, 1.0, 1.0);
   
   // Complete
   // Phong shading model
 
   // ambient light
-  vec4 ambient = multComponentWise(amb, lcol, 1.0);
+  vec4 ambient = amb * lcol;
 
   // Complete
   // compute the vector vertex (V) to light direction
-  vec4 t;
-  t = sub(light2, V);
-  //t = sub(V, light2);
-  vec4 L = normalize(t);
+  vec4 L = light2 - V;
+  L = normalize(L);
 
   // diffuse reflection
   float NdotL = max(0.0, dot(N, L));
-  vec4 diffuse = multComponentWise(diff, lcol, NdotL);
+  vec4 diffuse = diff * lcol * vec4(NdotL, NdotL, NdotL, 1.0);
 
   // Complete
   // reflected light direction R
-  vec4 l = sub(V, light2);
-  l = normalize(l);      // l: from the light source to the hit position
-
-  float tmp;
-  tmp = dot(l, N) * -2.0;
-  vec4 R = mulAV(tmp, N);
-  R = add(l, R);
+  vec4 l = normalize(-L);      // l: from the light source to the hit position
+  vec4 R = reflect(l, N);
 
   // Complete
   // Apply the Phong lighting model
 
-  // カメラの位置どうやって求める？ V
-  //////////t = pow( max( dot(R, V), 0.0 ), shiny);
-  //////////vec4 specular = multComponentWise(spec, l, t);
+  vec4 View = normalize(-V);
+  float s = max( dot(View, R), 0.0);
+  s = pow(s, shiny);
 
+  vec4 specular = spec * lcol * vec4(s, s, s, 1.0);
 
   // Complete
   // Save the final color in gl_FragColor
-  //gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
-
-  gl_FragColor = add(ambient, diffuse);  
-  //gl_FragColor = add(gl_FragColor, specular);
+  gl_FragColor = ambient + diffuse + specular;
 }
