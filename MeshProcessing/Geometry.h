@@ -18,7 +18,6 @@ void computeDotProduct(Vector3 v1, Vector3 v2, float* result);
 void computeCrossProduct(Vector3 v1, Vector3 v2, Vector3* result);
 void computeNorm(Vector3 v, float* result);
 void normalize(Vector3 v, Vector3* result);
-int compare(Vector3 v1, Vector3 v2);
 
 
 #endif
