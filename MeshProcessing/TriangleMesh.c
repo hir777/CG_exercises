@@ -212,34 +212,30 @@ void computeVertexNormals(TriangleMesh* tri_mesh)
 {
   // Complete
   // Compute the normal at each vertex. Use p. 29-31 from the slides
-  int i, j;
+  int i, j, *cnt_adj_tris;
   float weight = 1.0;
 
   int num_verts = tri_mesh->_number_vertices;
   int num_tris  = tri_mesh->_number_triangles;
+  
   tri_mesh->_vertex_normals = (Vector3 *)malloc( num_verts * sizeof(Vector3) );
-  Vector3 sum;
-  for( i = 0; i < num_verts; i++ ) {
-    sum._x = sum._y = sum._z = 0.0;
-    Vector3 v = tri_mesh->_vertices[i];
+  memset(tri_mesh->_vertex_normals, 0, num_verts * sizeof(Vector3) );
 
-    for( j = 0; j < num_tris; j++ ) {
-      Vector3 coord[3];
-      getTriangleVertices(tri_mesh, j, coord);
-      if( compare(v, coord[0]) || compare(v, coord[1]) || compare(v, coord[2]) ) {
-        // true only when the triangle is adjacent to the vertex v
-        Vector3 n;
-        getTriangleNormal(tri_mesh, j, &n);
-        mulAV(weight, n, &n);
-        add(sum, n, &sum);
-      }
-    }
+  for( i = 0; i < num_tris; i++ ) {
+    int v0 = tri_mesh->_triangles[i]._v0;
+    int v1 = tri_mesh->_triangles[i]._v1;
+    int v2 = tri_mesh->_triangles[i]._v2;
 
-    normalize(sum, &sum);
-    tri_mesh->_vertex_normals[i]._x = sum._x;
-    tri_mesh->_vertex_normals[i]._y = sum._y;
-    tri_mesh->_vertex_normals[i]._z = sum._z;
+    add(tri_mesh->_vertex_normals[v0], tri_mesh->_triangle_normals[i], &(tri_mesh->_vertex_normals[v0]));
+    mulVA(tri_mesh->_vertex_normals[v0], weight, &(tri_mesh->_vertex_normals[v0]));
+    add(tri_mesh->_vertex_normals[v1], tri_mesh->_triangle_normals[i], &(tri_mesh->_vertex_normals[v1]));
+    mulVA(tri_mesh->_vertex_normals[v1], weight, &(tri_mesh->_vertex_normals[v1]));
+    add(tri_mesh->_vertex_normals[v2], tri_mesh->_triangle_normals[i], &(tri_mesh->_vertex_normals[v2]));
+    mulVA(tri_mesh->_vertex_normals[v2], weight, &(tri_mesh->_vertex_normals[v2]));
   }
+
+  for( i = 0; i < num_verts; i++ )
+    normalize(tri_mesh->_vertex_normals[i], &(tri_mesh->_vertex_normals[i]) );
 }
 
 
