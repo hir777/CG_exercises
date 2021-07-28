@@ -69,21 +69,19 @@ void main(){
   // Phong shading model
 
   // ambient light
-  vec4 ambient = amb * lcol;
+  //vec4 ambient = amb * lcol;
 
   // Complete
   // compute the vector vertex (V) to light direction
-  vec4 L = light2 - V;
-  L = normalize(L);
+  vec4 L = normalize(light2 - V);
 
   // diffuse reflection
   float NdotL = max(0.0, dot(N, L));
-  vec4 diffuse = diff * lcol * vec4(NdotL, NdotL, NdotL, 1.0);
+  vec4 diffuse = diff * NdotL;
 
   // Complete
   // reflected light direction R
-  vec4 l = normalize(-L);      // l: from the light source to the hit position
-  vec4 R = reflect(l, N);
+  vec4 R = reflect(-L, N);
 
   // Complete
   // Apply the Phong lighting model
@@ -92,9 +90,9 @@ void main(){
   float s = max( dot(View, R), 0.0);
   s = pow(s, shiny);
 
-  vec4 specular = spec * lcol * vec4(s, s, s, 1.0);
+  vec4 specular = spec * s;
 
   // Complete
   // Save the final color in gl_FragColor
-  gl_FragColor = ambient + diffuse + specular;
+  gl_FragColor = specular + diffuse;
 }
