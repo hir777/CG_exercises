@@ -27,20 +27,20 @@ void main()
   // (i.e. multiply vPosition by the projection matrix
   // and the model-view matrix).
   // Save the result in gl_Position
-  gl_Position = vPosition * PMatrix * MVMatrix;
+  gl_Position = PMatrix * MVMatrix * vPosition;
 
 
   // Complete
   // compute the vertex in eye space (i.e. multiply vPosition by the
   // model view matrix).
   // Save the result in oPosition
-  oPosition = vPosition * MVMatrix;
+  oPosition = MVMatrix * vPosition;
 
 
   // Complete
   // compute the normal in eye space (i.e. multiply vNormal by the
   // normal matrix).
   // Save the result in oNormal
-  oNormal = vNormal * NormalMatrix;
+  oNormal = NormalMatrix * vNormal;
   
 }
