@@ -2,6 +2,12 @@
 
 #include "Geometry.h"
 
+void assign(Vector3 v, Vector3* result) {
+  result->_x = v._x;
+  result->_y = v._y;
+  result->_z = v._z;
+}
+
 void add(Vector3 v1, Vector3 v2, Vector3* result) {
   result->_x = v1._x + v2._x;
   result->_y = v1._y + v2._y;
