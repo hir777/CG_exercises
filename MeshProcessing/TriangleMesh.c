@@ -175,6 +175,7 @@ void computeTriangleNormals(TriangleMesh* tri_mesh)
   // Complete
   // Compute the normal at each triangle. Use p. 27 from the slides
   int i;
+  Vector3 zero = {0.0, 0.0, 0.0};
   int num_tris = tri_mesh->_number_triangles;
   tri_mesh->_triangle_normals = (Vector3 *)malloc( num_tris * sizeof(Vector3) );
   
@@ -184,15 +185,9 @@ void computeTriangleNormals(TriangleMesh* tri_mesh)
     int v2 = tri_mesh->_triangles[i]._v2;
 
     Vector3 p0, p1, p2;
-    p0._x = tri_mesh->_vertices[v0]._x;
-    p0._y = tri_mesh->_vertices[v0]._y;
-    p0._z = tri_mesh->_vertices[v0]._z; 
-    p1._x = tri_mesh->_vertices[v1]._x;
-    p1._y = tri_mesh->_vertices[v1]._y;
-    p1._z = tri_mesh->_vertices[v1]._z; 
-    p2._x = tri_mesh->_vertices[v2]._x;
-    p2._y = tri_mesh->_vertices[v2]._y;
-    p2._z = tri_mesh->_vertices[v2]._z;
+    add(tri_mesh->_vertices[v0], zero, &p0);
+    add(tri_mesh->_vertices[v1], zero, &p1);
+    add(tri_mesh->_vertices[v2], zero, &p2);
 
     Vector3 a, b, n;
     sub(p1, p0, &a);
